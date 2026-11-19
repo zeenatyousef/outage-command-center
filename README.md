@@ -4,10 +4,9 @@ A live dashboard that turns a flood of raw network alerts into a few incidents, 
 
 It runs on your own machine with no Docker and no Telegram. Data lives in a local SQLite file.
 
-## Documentation and demo video
+## Documentation
 
 - `docs/Outage-Command-Center-Documentation.pdf`: the full guide (how it works, architecture, running it, using the dashboard, connecting real tools, results, limits).
-- `docs/outage-command-center-demo.mp4`: a 1 minute 43 second recording of the real app handling a fiber cut and a silent hub failure. It has captions and no sound.
 
 ## Run it
 
@@ -16,7 +15,7 @@ You need **Python 3.10 or newer**. Node.js is only needed if you want to change 
 **Windows:** double-click `start.bat`
 **macOS / Linux:** run `./start.sh`
 
-The first run creates a virtual environment, installs the Python packages, seeds the demo network and opens http://localhost:8000. Later runs start in a few seconds.
+The first run creates a virtual environment, installs the Python packages, seeds the sample network and opens http://localhost:8000. Later runs start in a few seconds.
 
 The map tiles and fonts load from the internet. Without a connection the map background is blank and the font falls back to the system font, but the network itself still draws and everything works.
 
@@ -29,18 +28,18 @@ npm run dev        # http://localhost:5173, proxies to the backend on :8000
 npm run build      # rebuilds frontend/dist, which the backend serves
 ```
 
-## Demo script (about 5 minutes)
+## Walkthrough script (about 5 minutes)
 
-1. Show the healthy map: 86 nodes, 2,973 demo customers.
+1. Show the healthy map: 86 nodes, 2,973 customers.
 2. Pick **Fiber cut**, location **North Hub**, press **Run scenario**.
 3. Watch the map turn red from the hub outward. Raw alerts pile up in the **Raw alerts** tab, but **Incidents** shows one. The counter shows how much noise was removed.
 4. A **critical** notification appears a few seconds later (the app waits for correlation to settle so it announces one outage, not one per tower). Open the incident to see the customer update, technical summary, what to check, and the timeline.
 5. Point out the dashed purple line: one tower on the North Hub fails over to a backup uplink, so those customers are *degraded*, not offline.
 6. Press **Restore network**. The incident goes to *Recovering*, then resolves itself after a 15-second stability hold.
-7. Run **Silent hub failure**. The hub never raises an alert, yet the incident is rooted at the hub and marked *Root cause inferred*. This is the strongest moment of the demo.
+7. Run **Silent hub failure**. The hub never raises an alert, yet the incident is rooted at the hub and marked *Root cause inferred*. This is the strongest moment of the walkthrough.
 8. Finish with **Two faults at once** to show unrelated failures are not merged, and **Flapping link** to show repeated down/up is grouped and labelled.
 
-Use **Reset demo** between runs.
+Use **Reset** between runs.
 
 ## How correlation works
 
@@ -83,7 +82,7 @@ Send alerts to `POST /api/alerts` as JSON (one object or a list):
 {"node_id": "HUB-N", "type": "LINK_DOWN", "message": "uplink down"}
 ```
 
-Types: `LINK_DOWN`, `POWER_FAILURE`, `NODE_UNREACHABLE`, `HIGH_LATENCY`, `PACKET_LOSS`, and `CLEARED` to report recovery. `node_id` must match a node in the topology (`seed.py` defines the demo one; replace it with your real nodes and customers). Interactive API docs are at http://localhost:8000/docs.
+Types: `LINK_DOWN`, `POWER_FAILURE`, `NODE_UNREACHABLE`, `HIGH_LATENCY`, `PACKET_LOSS`, and `CLEARED` to report recovery. `node_id` must match a node in the topology (`seed.py` defines the sample one; replace it with your real nodes and customers). Interactive API docs are at http://localhost:8000/docs.
 
 ## Project layout
 
@@ -95,7 +94,7 @@ backend/
   app/main.py          REST API, WebSocket, background loops
   app/statusdraft.py   customer update, technical summary, runbooks
   app/llm.py           optional AI rewrite   app/notifier.py  optional email
-  app/seed.py          demo network and customers
+  app/seed.py          sample network and customers
   tests/               24 tests            evaluate.py   accuracy report
 frontend/              React + Leaflet dashboard (built copy in dist/)
 ```
@@ -105,6 +104,6 @@ Run the tests with `cd backend && python -m pytest`.
 ## Known limits
 
 - The topology is a tree with single backup uplinks. Meshed networks would need a graph model.
-- The demo network and customers are generated, not real.
+- The sample network and customers are generated, not real.
 - The AI rewrite and email paths are implemented but were not run against live services during development.
 - `start.bat` was written but not run on Windows.
